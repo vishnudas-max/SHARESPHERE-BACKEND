@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'userside',
     'adminside',
+    'post',
     'rest_framework',
     'corsheaders',
     'django_celery_results',

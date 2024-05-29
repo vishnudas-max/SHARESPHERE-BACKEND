@@ -41,3 +41,5 @@ class Posts(models.Model):
     uploadDate = models.DateTimeField(auto_now_add=True,null=True)
     updatedDate = models.DateTimeField(auto_now=True,null=True)
     is_deleted = models.BooleanField(default= False)
+
+
