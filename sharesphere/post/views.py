@@ -4,14 +4,15 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import viewsets,status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from .serializers import postCreateSeializer,PostsSerializer
-from userside.models import Posts
+from .serializers import postCreateSeializer,PostsSerializer,PostLikeserializer,GetLikedPostSerializer
+from userside.models import Posts,CustomUser
 from rest_framework.views import APIView
-
+from .models import PostLike
+from django.db.models import Count
 
 # Create your views here.
 
-
+# view for fetching all post,user's posts and deleting post--
 class PostsViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes =[IsAuthenticated]
@@ -26,9 +27,10 @@ class PostsViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = self.queryset
-        query_set = queryset.filter(is_deleted=False)
+        query_set = queryset.filter(is_deleted=False).annotate(likes_count = Count('postlikes')) #annotating counnt of totallikes ussing reverse forignkey relation
         return query_set
     
+    # deleting post-
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.is_deleted = True
@@ -37,7 +39,7 @@ class PostsViewSet(viewsets.ModelViewSet):
 
 
 
-
+# view for creation and updation of posts-
 class PostCreateUpdate(APIView):
 
     authentication_classes = [JWTAuthentication]
@@ -60,3 +62,36 @@ class PostCreateUpdate(APIView):
             return Response({'status':True,'message':'Post Updated'},status=status.HTTP_200_OK)
         return Response({'status':False},serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+
+# view for liking post -
+class PostLikeViewSet(viewsets.ModelViewSet):
+    queryset = PostLike.objects.all()
+    serializer_class = PostLikeserializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    # creating a post action to toggle between like and removing like--
+    @action(detail=True, methods=['post'], url_path='toggle-like')
+    def toggle_like(self, request, pk=None):
+        post = Posts.objects.get(pk=pk)
+        user = request.user
+        try:
+            post_like = PostLike.objects.get(postID=post, userID=user)
+            post_like.delete()
+            return Response({'detail': 'Post like removed'}, status=status.HTTP_204_NO_CONTENT)
+         
+        except PostLike.DoesNotExist:
+            PostLike.objects.create(postID=post, userID=user)
+            return Response({'detail': 'Post liked successfully'}, status=status.HTTP_201_CREATED)
+
+
+  
+class UserLikedPosts(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+            user = request.user
+            posts = PostLike.objects.filter(userID=user.id).values_list('postID')
+            return Response(posts)
+        

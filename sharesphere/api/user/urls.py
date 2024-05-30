@@ -6,10 +6,11 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from rest_framework.routers import DefaultRouter
-from post.views import PostsViewSet
+from post.views import PostsViewSet,PostLikeViewSet
 
 router = DefaultRouter()
 router.register(r'posts', PostsViewSet)
+router.register(r'postlike', PostLikeViewSet)
 
 urlpatterns = [
     path('register/',user.RegisterView.as_view(),name='register'),
@@ -19,5 +20,6 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('', include(router.urls)),
     path('post/',post.PostCreateUpdate.as_view()),
-    
+    path('get/user/liked/posts/',post.UserLikedPosts.as_view())
+   
 ]
