@@ -20,6 +20,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('', include(router.urls)),
     path('post/',post.PostCreateUpdate.as_view()),
-    path('get/user/liked/posts/',post.UserLikedPosts.as_view())
+    path('get/user/liked/posts/',post.UserLikedPosts.as_view()),
+    path('post/comment/<int:id>/',post.CommentView.as_view())
    
 ]

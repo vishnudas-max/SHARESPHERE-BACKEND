@@ -4,10 +4,10 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import viewsets,status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from .serializers import postCreateSeializer,PostsSerializer,PostLikeserializer,GetLikedPostSerializer
+from .serializers import postCreateSeializer,PostsSerializer,PostLikeserializer,CommentSerializer,CommentCreateSerializer
 from userside.models import Posts,CustomUser
 from rest_framework.views import APIView
-from .models import PostLike
+from .models import PostLike,Comments
 from django.db.models import Count
 
 # Create your views here.
@@ -85,7 +85,8 @@ class PostLikeViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Post liked successfully'}, status=status.HTTP_201_CREATED)
 
 
-  
+
+# views for getting user liked posts-  
 class UserLikedPosts(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -95,3 +96,21 @@ class UserLikedPosts(APIView):
             posts = PostLike.objects.filter(userID=user.id).values_list('postID')
             return Response(posts)
         
+
+
+class CommentView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request,id=None):
+        data = request.data
+        serializer = CommentCreateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self, request, id=None):
+        comments = Comments.objects.filter(postID=id, parent_comment__isnull=True).order_by('-id')
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

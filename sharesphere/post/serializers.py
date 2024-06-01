@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from userside.models import CustomUser,Posts
-from .models import PostLike
+from .models import PostLike,Comments
 
 # serializer to serializer user data-
 class UserDetailsSerializer(serializers.ModelSerializer):
@@ -31,7 +31,29 @@ class postCreateSeializer(serializers.ModelSerializer):
         fields = ['userID','caption','contend']
 
 
+# serializer for getting user liked posts--
 class GetLikedPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostLike
         fields =['postID']
+
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id', 'userID', 'postID', 'comment', 'comment_time', 'parent_comment']
+
+
+class ReplySerializer(serializers.ModelSerializer):
+    userID = UserDetailsSerializer(read_only = True)
+    class Meta:
+        model = Comments
+        fields = ['id','userID','postID','comment','comment_time']
+
+class CommentSerializer(serializers.ModelSerializer):
+    userID = UserDetailsSerializer(read_only =True)
+    replies = ReplySerializer(many = True,read_only = True)
+    class Meta:
+        model = Comments
+        fields = ['id','userID','postID','comment','comment_time','parent_comment','replies']
