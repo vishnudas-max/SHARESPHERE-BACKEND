@@ -10,7 +10,15 @@ from django.db.models import Count, F
 from django.db.models.functions import ExtractWeekDay
 from rest_framework import viewsets
 from .serializers import AdminUserSerializer
+from rest_framework.pagination import PageNumberPagination
 # Create your views here.
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 7  # Number of items per page
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 class UserVerificatinCount(APIView):
 
@@ -57,7 +65,16 @@ class GeUsers(viewsets.ModelViewSet):
     permission_classes =[IsAuthenticated]
     queryset = CustomUser.objects.all()
     serializer_class = AdminUserSerializer
-
+    pagination_class = StandardResultsSetPagination
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            queryset = queryset.filter(username__icontains=search_query)
+        queryset = queryset.filter(is_superuser = False)
+        queryset = queryset.annotate(post_count=Count('userPosts'))
+        return queryset
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
