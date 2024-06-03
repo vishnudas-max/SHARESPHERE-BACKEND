@@ -38,19 +38,20 @@ class GetLikedPostSerializer(serializers.ModelSerializer):
         fields =['postID']
 
 
-
+# serializer for creating comments--
 class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = ['id', 'userID', 'postID', 'comment', 'comment_time', 'parent_comment']
 
-
+# serializer for comment reply-
 class ReplySerializer(serializers.ModelSerializer):
     userID = UserDetailsSerializer(read_only = True)
     class Meta:
         model = Comments
         fields = ['id','userID','postID','comment','comment_time']
 
+# serializers for getting comments with replies--
 class CommentSerializer(serializers.ModelSerializer):
     userID = UserDetailsSerializer(read_only =True)
     replies = ReplySerializer(many = True,read_only = True)

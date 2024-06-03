@@ -21,6 +21,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('post/',post.PostCreateUpdate.as_view()),
     path('get/user/liked/posts/',post.UserLikedPosts.as_view()),
-    path('post/comment/<int:id>/',post.CommentView.as_view())
-   
+    path('post/comment/<int:id>/',post.CommentView.as_view()),
+    path('follow/<str:username>',user.FollowAndFollowingView.as_view()),
+    path('suggested/users/',user.getRandomUser.as_view()),
+    path('user/profile/detailes/<int:id>/',user.GetUserProfile.as_view())
 ]

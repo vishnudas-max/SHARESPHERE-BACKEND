@@ -13,6 +13,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
+    following = models.ManyToManyField('self', symmetrical=False, related_name='user_followers', blank=True)
+    followers = models.ManyToManyField('self', symmetrical=False, related_name='user_followwing', blank=True)
 
 
     objects = CustomUserManager()

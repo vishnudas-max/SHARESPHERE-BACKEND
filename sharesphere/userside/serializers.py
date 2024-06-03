@@ -42,3 +42,56 @@ class RegisterSerializer(serializers.Serializer):
         return validated_data
 
 
+# serializer to set add follwing and followers-
+class FollowFollwersSerializer(serializers.Serializer):
+    userID = serializers.IntegerField()
+
+
+# serializer for getching 5 random user's for suggetions--
+class GetRandomUsersSerializer(serializers.ModelSerializer):
+    is_following = serializers.SerializerMethodField()
+    class Meta:
+        model = CustomUser
+        fields = ['id','username','profile_pic','is_following']
+
+    def get_is_following(self,obj):
+        user = self.context['request'].user
+        return obj in user.following.all()
+
+
+
+# serializer for serializing post data-
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Posts
+        fields = ['id','contend']
+
+# serializer for getting user profile detailes--
+class ProfileDetailSeializer(serializers.ModelSerializer):
+    post_count = serializers.SerializerMethodField()
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    posts = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'profile_pic', 'bio', 'created_date', 'is_active', 'is_admin', 'is_verified', 'post_count', 'followers_count', 'following_count', 'posts','is_following']
+
+    def get_post_count(self, obj):
+        return obj.userPosts.count()
+
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+
+    def get_following_count(self, obj):
+        return obj.following.count()
+    
+    def get_is_following(self,obj):
+        user = self.context['request'].user
+        return obj in user.following.all()
+    
+    def get_posts(self,obj):
+        posts= obj.userPosts.filter(is_deleted=False)
+        return PostSerializer(posts,many = True).data
+    
