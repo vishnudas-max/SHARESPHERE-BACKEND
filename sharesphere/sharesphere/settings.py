@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'userside',
     'adminside',
     'post',
+    'story',
     'rest_framework',
     'corsheaders',
     'django_celery_results',

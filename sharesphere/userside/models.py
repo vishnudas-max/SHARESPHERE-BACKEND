@@ -24,8 +24,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
-
-
+    
+   
 class Regotp(models.Model):
     email = models.EmailField(null=False,unique=True)
     secret = models.CharField(max_length=200,null=False)

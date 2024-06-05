@@ -3,6 +3,7 @@ from .models import CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Posts
+from post.serializers import UserDetailsSerializer
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -66,6 +67,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Posts
         fields = ['id','contend']
 
+
 # serializer for getting user profile detailes--
 class ProfileDetailSeializer(serializers.ModelSerializer):
     post_count = serializers.SerializerMethodField()
@@ -73,10 +75,13 @@ class ProfileDetailSeializer(serializers.ModelSerializer):
     following_count = serializers.SerializerMethodField()
     posts = serializers.SerializerMethodField()
     is_following = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'profile_pic', 'bio', 'created_date', 'is_active', 'is_admin', 'is_verified', 'post_count', 'followers_count', 'following_count', 'posts','is_following']
+        fields = ['id', 'username', 'email', 'profile_pic', 'bio', 'created_date', 'is_active', 'is_admin', 'is_verified', 'post_count', 'followers_count', 'following_count', 
+                  'posts','is_following','following','followers']
 
     def get_post_count(self, obj):
         return obj.userPosts.count()
@@ -90,6 +95,16 @@ class ProfileDetailSeializer(serializers.ModelSerializer):
     def get_is_following(self,obj):
         user = self.context['request'].user
         return obj in user.following.all()
+    
+    def get_following(self,obj):
+        user = self.context['request'].user
+        users =user.following.all()
+        return UserDetailsSerializer(users,many=True).data
+    
+    def get_followers(self,obj):
+        user = self.context['request'].user
+        users =user.followers.all()
+        return UserDetailsSerializer(users,many=True).data
     
     def get_posts(self,obj):
         posts= obj.userPosts.filter(is_deleted=False)
