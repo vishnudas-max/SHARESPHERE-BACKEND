@@ -19,6 +19,16 @@ class PostsViewSet(viewsets.ModelViewSet):
     queryset = Posts.objects.all()
     serializer_class = PostsSerializer
 
+    def get_serializer(self, *args, **kwargs):
+        # Pass 'request.user' to the serializer context
+        kwargs['context'] = self.get_serializer_context()
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request_user'] = self.request.user
+        return context
+    
     @action(detail=False, methods=['get'], url_path='user-post/(?P<user_id>[^/.]+)')
     def user_posts(self, request, user_id=None):
         posts = Posts.objects.filter(userID=user_id)

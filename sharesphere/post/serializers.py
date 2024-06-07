@@ -20,9 +20,23 @@ class PostsSerializer(serializers.ModelSerializer):
     userID = UserDetailsSerializer(read_only=True)
     likes_count =serializers.IntegerField(read_only = True)
     liked_users = PostLikeserializer(source = 'postlikes' , many = True ,read_only = True)  #getting seialized data of users' who liked the post-
+    comment_count = serializers.SerializerMethodField(read_only = True)
+    is_following = serializers.SerializerMethodField(read_only = True)
     class Meta:
         model = Posts
-        fields = ['id','userID', 'caption', 'contend', 'uploadDate', 'updatedDate', 'is_deleted', 'likes_count','liked_users']
+        fields = ['id','userID', 'caption', 'contend', 'uploadDate', 'updatedDate', 'is_deleted', 'likes_count','liked_users','comment_count','is_following']
+
+    def get_is_following(self,obj):
+        user = self.context['request_user']
+        currentUser =CustomUser.objects.get(username=user)
+        if obj.userID == currentUser:
+            return True
+        else:
+            return obj.userID in currentUser.following.all()
+        
+
+    def get_comment_count(self,obj):
+        return obj.postcomments.all().count()
 
 # serializer for creation and updation of posts--
 class postCreateSeializer(serializers.ModelSerializer):
