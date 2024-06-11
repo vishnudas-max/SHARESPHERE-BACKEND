@@ -12,6 +12,7 @@ class GetUsers(APIView):
 
     def get(self,request):
         user =request.user
+        print('hello')
         all_users =user.following.all()
         serializer = UserSerializer(all_users,many = True)
         return Response(serializer.data)
