@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'userside',
     'adminside',
     'post',
+    'chat',
     'story',
     'rest_framework',
     'corsheaders',
@@ -183,4 +184,15 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "TOKEN_OBTAIN_SERIALIZER": "userside.serializers.MyTokenObtainPairSerializer",
+}
+
+
+# CHANNELS CONFIGURATIONS-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
 }
